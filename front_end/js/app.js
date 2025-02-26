@@ -10,6 +10,11 @@ const COURSES_API = 'http://api.cc.localhost/courses';
 let allCategories = [];
 let allCourses = [];
 
+// Utility function to truncate text with ellipses
+function truncateText(text, maxLength) {
+  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
+}
+
 // Fetch Categories
 async function fetchCategories() {
   try {
@@ -41,19 +46,19 @@ function calculateCourseCounts(categories, courses) {
   const categoryMap = new Map();
 
   // Initialize counts
-  categories.forEach((category) => {
+  categories.data.forEach((category) => {
     categoryMap.set(category.id, { ...category, count_of_courses: 0 });
   });
 
   // Count direct courses
-  courses.forEach((course) => {
+  courses.data.forEach((course) => {
     if (categoryMap.has(course.category_id)) {
       categoryMap.get(course.category_id).count_of_courses++;
     }
   });
 
   // Propagate counts to parent categories
-  categories.forEach((category) => {
+  categories.data.forEach((category) => {
     let current = category;
     while (current.parent && categoryMap.has(current.parent)) {
       categoryMap.get(current.parent).count_of_courses += current.count_of_courses;
@@ -87,16 +92,26 @@ function renderCourses() {
     return;
   }
 
-  courseList.innerHTML = allCourses
+  const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+
+  courseList.innerHTML = allCourses.data
     .map(
       (course) => {
         const category = allCategories.find((cat) => cat.id === course.category_id);
         const mainCategoryName = category ? category.name : 'Unknown Category';
+
+        const truncatedTitle = isDesktop
+          ? truncateText(course.title, 50)
+          : course.title;
+        const truncatedDescription = isDesktop
+          ? truncateText(course.description, 100)
+          : course.description;
+
         return `
           <div class="course-card">
             <img src="${course.image_preview}" alt="${course.title}" />
-            <h3>${course.title}</h3>
-            <p>${course.description}</p>
+            <h3>${truncatedTitle}</h3>
+            <p>${truncatedDescription}</p>
             <small>Main Category: ${mainCategoryName}</small>
           </div>
         `;
