@@ -1,26 +1,27 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import { useCategories } from './hooks/useCategories';
+import { useCourses } from './hooks/useCourses';
+import CategoryList from './components/CategoryList';
+import CourseList from './components/CourseList';
 
-function App() {
+const App: React.FC = () => {
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const categories = useCategories();
+  const courses = useCourses(selectedCategoryId);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <h1>Course Catalog</h1>
+      <div style={{ display: 'flex' }}>
+        <div style={{ width: '20%' }}>
+          <CategoryList categories={categories} onSelect={setSelectedCategoryId} />
+        </div>
+        <div style={{ width: '80%' }}>
+          <CourseList courses={courses} />
+        </div>
+      </div>
     </div>
   );
-}
+};
 
 export default App;
