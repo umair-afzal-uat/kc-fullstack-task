@@ -8,41 +8,46 @@ require_once __DIR__ . '/controllers/CourseController.php';
 
 header('Content-Type: application/json');
 
-$requestMethod = $_SERVER['REQUEST_METHOD'];
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$uriParts = explode('/', trim($uri, '/'));
+try {
+    $requestMethod = $_SERVER['REQUEST_METHOD'];
+    $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $uriParts = explode('/', trim($uri, '/'));
 
-// Route requests
-switch ($uriParts[0]) {
-    case 'categories':
-        $controller = new \Controllers\CategoryController();
-        if ($requestMethod === 'GET') {
-            if (isset($uriParts[1])) {
-                $controller->getCategoryById($uriParts[1]);
+    switch ($uriParts[0]) {
+        case 'categories':
+            $controller = new \Controllers\CategoryController();
+            if ($requestMethod === 'GET') {
+                if (isset($uriParts[1])) {
+                    $controller->getCategoryById($uriParts[1]);
+                } else {
+                    $controller->getAllCategories();
+                }
             } else {
-                $controller->getAllCategories();
+                http_response_code(405);
+                echo json_encode(['status' => 'error', 'message' => 'Method Not Allowed']);
             }
-        } else {
-            http_response_code(405);
-            echo json_encode(['error' => 'Method Not Allowed']);
-        }
-        break;
+            break;
 
-    case 'courses':
-        $controller = new \Controllers\CourseController();
-        if ($requestMethod === 'GET') {
-            if (isset($uriParts[1])) {
-                $controller->getCourseById($uriParts[1]);
+        case 'courses':
+            $controller = new \Controllers\CourseController();
+            if ($requestMethod === 'GET') {
+                if (isset($uriParts[1])) {
+                    $controller->getCourseById($uriParts[1]);
+                } else {
+                    $controller->getCourses();
+                }
             } else {
-                $controller->getCourses();
+                http_response_code(405);
+                echo json_encode(['status' => 'error', 'message' => 'Method Not Allowed']);
             }
-        } else {
-            http_response_code(405);
-            echo json_encode(['error' => 'Method Not Allowed']);
-        }
-        break;
+            break;
 
-    default:
-        http_response_code(404);
-        echo json_encode(['error' => 'Not Found']);
+        default:
+            http_response_code(404);
+            echo json_encode(['status' => 'error', 'message' => 'Not Found']);
+    }
+} catch (\Exception $e) {
+
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }

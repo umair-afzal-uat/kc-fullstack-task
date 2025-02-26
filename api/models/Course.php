@@ -14,7 +14,7 @@ class Course {
     // Fetch all courses or filter by category ID
     public function getCourses($categoryId = null) {
         $sql = "
-            SELECT c.id, c.name, c.description, cat.name AS main_category_name
+            SELECT c.course_id, c.title, c.description, c.image_preview, cat.name AS main_category_name
             FROM courses c
             JOIN categories cat ON c.category_id = cat.id
         ";
@@ -23,21 +23,21 @@ class Course {
         }
         $stmt = $this->db->prepare($sql);
         if ($categoryId !== null) {
-            $stmt->bindParam(':category_id', $categoryId, \PDO::PARAM_INT);
+            $stmt->bindParam(':category_id', $categoryId, \PDO::PARAM_STR); 
         }
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     // Fetch a single course by ID
-    public function getCourseById($id) {
+    public function getCourseById($courseId) {
         $stmt = $this->db->prepare("
-            SELECT c.id, c.name, c.description, cat.name AS main_category_name
+            SELECT c.course_id, c.title, c.description, c.image_preview, cat.name AS main_category_name
             FROM courses c
             JOIN categories cat ON c.category_id = cat.id
-            WHERE c.id = :id
+            WHERE c.course_id = :course_id
         ");
-        $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
+        $stmt->bindParam(':course_id', $courseId, \PDO::PARAM_STR); 
         $stmt->execute();
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
