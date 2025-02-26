@@ -70,18 +70,43 @@ function calculateCourseCounts(categories, courses) {
 }
 
 // Render Categories
+function buildCategoryTree(categories) {
+  let categoryMap = new Map();
+  let tree = [];
+
+  categories.forEach(category => {
+      category.children = [];
+      categoryMap.set(category.id, category);
+  });
+
+  categories.forEach(category => {
+      if (category.parent_id) {
+          let parent = categoryMap.get(category.parent_id);
+          if (parent) {
+              parent.children.push(category);
+          }
+      } else {
+          tree.push(category);
+      }
+  });
+
+  return tree;
+}
+
+function renderCategoryTree(categories, depth = 0) {
+  return categories.map(category => `
+      <li onclick="filterCourses('${category.id}')" style="padding-left: ${depth * 20}px">
+          ${category.name} (${category.count_of_courses})
+      </li>
+      ${category.children.length ? renderCategoryTree(category.children, depth + 1) : ''}
+  `).join('');
+}
+
 function renderCategories() {
+  let tree = buildCategoryTree(allCategories);
   categoryList.innerHTML = `
-    <li onclick="filterCourses(null)">All Categories</li>
-    ${allCategories
-      .map(
-        (category) => `
-          <li onclick="filterCourses('${category.id}')">
-            ${category.name} (${category.count_of_courses})
-          </li>
-        `
-      )
-      .join('')}
+      <li onclick="filterCourses(null)">All Categories</li>
+      ${renderCategoryTree(tree)}
   `;
 }
 
