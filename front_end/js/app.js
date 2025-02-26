@@ -123,7 +123,7 @@ function renderCourses() {
     .map(
       (course) => {
         const category = allCategories.find((cat) => cat.id === course.category_id);
-        const mainCategoryName = category ? category.name : 'Unknown Category';
+        const mainCategoryName = course ? course.main_category_name : 'Unknown Category';
 
         const truncatedTitle = isDesktop
           ? truncateText(course.title, 50)
@@ -137,6 +137,7 @@ function renderCourses() {
             <img src="${course.image_preview}" alt="${course.title}" />
             <h3>${truncatedTitle}</h3>
             <p>${truncatedDescription}</p>
+            <small>Main Category: ${mainCategoryName}</small>
           </div>
         `;
       }
