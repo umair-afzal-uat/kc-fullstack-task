@@ -14,9 +14,7 @@ body {
     padding: 20px;
   }
   
-  .categories {
-    width: 20%;
-  }
+   
   
   .courses {
     width: 80%;
@@ -41,11 +39,16 @@ body {
   }
   
   .course-card h3 {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: break-spaces;
+    overflow: hidden; 
   }
-  
+  .categories {
+    width: 20%;
+    margin-top: 94px;
+}
+  .title {
+    margin: 29px 0;
+}
   .course-card p {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -58,3 +61,38 @@ body {
     margin-top: 8px;
     color: #666;
   }
+  *{
+    margin: 0;
+    padding: 0;
+  }
+  ul{
+    list-style: none;
+  }
+  .container-wrap {
+    display: flex; 
+    padding: 20px;
+  }
+  .categories {
+    width: 20%;
+  }
+  .courses-inner {
+              display: grid ;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px 26px;
+    }
+    .courses{
+      width: 80%;
+    }
+    .card-item {
+      background: red;
+      height: 398px;
+    }
+    .course-card img{
+      max-width: 100%;
+    }
+    @media (max-width: 1024px) {  
+      .courses-inner { 
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px 26px;
+    }
+    }
