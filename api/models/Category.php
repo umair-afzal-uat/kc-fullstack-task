@@ -18,7 +18,7 @@ class Category {
                    (SELECT COUNT(*) 
                     FROM courses 
                     WHERE category_id IN (
-                        SELECT id FROM categories WHERE id = c.id OR parent_id = c.id
+                        SELECT id FROM categories WHERE id = c.id OR parent_id = id
                     )
                    ) AS count_of_courses
             FROM categories c
