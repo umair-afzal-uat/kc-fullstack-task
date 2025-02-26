@@ -52,3 +52,9 @@ body {
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+  
+  .course-card small {
+    display: block;
+    margin-top: 8px;
+    color: #666;
+  }

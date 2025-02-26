@@ -15,7 +15,7 @@ async function fetchCategories() {
   try {
     const response = await fetch(CATEGORIES_API);
     const data = await response.json();
-    allCategories = data;
+    allCategories = calculateCourseCounts(data, allCourses);
     renderCategories();
   } catch (error) {
     console.error('Error fetching categories:', error);
@@ -29,10 +29,39 @@ async function fetchCourses(categoryId = null) {
     const response = await fetch(url);
     const data = await response.json();
     allCourses = data;
+    fetchCategories(); // Recalculate course counts after fetching courses
     renderCourses();
   } catch (error) {
     console.error('Error fetching courses:', error);
   }
+}
+
+// Calculate Course Counts for Categories (Including Child Categories)
+function calculateCourseCounts(categories, courses) {
+  const categoryMap = new Map();
+
+  // Initialize counts
+  categories.forEach((category) => {
+    categoryMap.set(category.id, { ...category, count_of_courses: 0 });
+  });
+
+  // Count direct courses
+  courses.forEach((course) => {
+    if (categoryMap.has(course.category_id)) {
+      categoryMap.get(course.category_id).count_of_courses++;
+    }
+  });
+
+  // Propagate counts to parent categories
+  categories.forEach((category) => {
+    let current = category;
+    while (current.parent && categoryMap.has(current.parent)) {
+      categoryMap.get(current.parent).count_of_courses += current.count_of_courses;
+      current = categoryMap.get(current.parent);
+    }
+  });
+
+  return Array.from(categoryMap.values());
 }
 
 // Render Categories
@@ -60,13 +89,18 @@ function renderCourses() {
 
   courseList.innerHTML = allCourses
     .map(
-      (course) => `
-        <div class="course-card">
-          <img src="${course.image_preview}" alt="${course.title}" />
-          <h3>${course.title}</h3>
-          <p>${course.description}</p>
-        </div>
-      `
+      (course) => {
+        const category = allCategories.find((cat) => cat.id === course.category_id);
+        const mainCategoryName = category ? category.name : 'Unknown Category';
+        return `
+          <div class="course-card">
+            <img src="${course.image_preview}" alt="${course.title}" />
+            <h3>${course.title}</h3>
+            <p>${course.description}</p>
+            <small>Main Category: ${mainCategoryName}</small>
+          </div>
+        `;
+      }
     )
     .join('');
 }
@@ -78,8 +112,7 @@ function filterCourses(categoryId) {
 
 // Initialize App
 function initApp() {
-  fetchCategories();
-  fetchCourses();
+  fetchCourses(); // Fetch all courses initially
 }
 
 // Start the Application
