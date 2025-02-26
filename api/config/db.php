@@ -10,8 +10,8 @@ class Database {
             try {
                 self::$instance = new \PDO(
                     'mysql:host=db.cc.localhost;dbname=course_catalog;charset=utf8',
-                    'root',
-                    'password'
+                    'test_user',
+                    'test_password'
                 );
                 self::$instance->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             } catch (\PDOException $e) {
