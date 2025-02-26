@@ -9,7 +9,7 @@ class Database {
         if (self::$instance === null) {
             try {
                 self::$instance = new \PDO(
-                    'mysql:host=db.cc.localhost;dbname=course_catalog;charset=utf8',
+                    'mysql:host=db;dbname=course_catalog;charset=utf8',
                     'test_user',
                     'test_password'
                 );

@@ -7,9 +7,6 @@ CREATE TABLE `courses` (
     `category_id` VARCHAR(255) NOT NULL,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`course_id`),
-    FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON DELETE CASCADE
+    PRIMARY KEY (`course_id`)
 );
 
--- down
-DROP TABLE `courses`;

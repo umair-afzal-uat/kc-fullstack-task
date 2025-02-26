@@ -10,5 +10,3 @@ CREATE TABLE `categories` (
     FOREIGN KEY (`parent_id`) REFERENCES `categories`(`id`) ON DELETE CASCADE
 );
 
--- down
-DROP TABLE `categories`;

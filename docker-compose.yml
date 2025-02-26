@@ -38,12 +38,17 @@ services:
     depends_on:
       - db
     volumes:
-      - ./api/:/var/www/html/
+      - ./api/:/var/www/html
+      - ./database/:/var/www/html/database
+      - ./data/:/var/www/html/data
     stdin_open: true
     tty: true
     hostname: api.cc.localhost
     labels:
       - traefik.http.routers.api.rule=Host(`api.cc.localhost`)
+    build:
+      context: .
+      dockerfile: Dockerfile  
   front:
     image: php:8.3-apache
     container_name: front
