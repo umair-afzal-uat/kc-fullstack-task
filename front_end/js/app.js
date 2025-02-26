@@ -47,7 +47,7 @@ function calculateCourseCounts(categories, courses) {
 
   // Initialize counts
   categories.data.forEach((category) => {
-    categoryMap.set(category.id, { ...category, count_of_courses: 0 });
+    categoryMap.set(category.id, { ...category, count_of_courses: category.count_of_courses });
   });
 
   // Count direct courses
@@ -137,7 +137,6 @@ function renderCourses() {
             <img src="${course.image_preview}" alt="${course.title}" />
             <h3>${truncatedTitle}</h3>
             <p>${truncatedDescription}</p>
-            <small>Main Category: ${mainCategoryName}</small>
           </div>
         `;
       }
