@@ -5,14 +5,18 @@ namespace Controllers;
 use Models\Category;
 
 class CategoryController {
-    private $categoryModel;
+    private Category $categoryModel;
 
     public function __construct() {
-        $this->categoryModel = new \Models\Category();
+        $this->categoryModel = new Category();
     }
 
-    // GET /categories
-    public function getAllCategories() {
+    /**
+     * Get all categories.
+     *
+     * @return void Outputs JSON response.
+     */
+    public function getAllCategories(): void {
         try {
             $categories = $this->categoryModel->getAllCategories();
             echo json_encode([
@@ -28,8 +32,13 @@ class CategoryController {
         }
     }
 
-    // GET /categories/{id}
-    public function getCategoryById($id) {
+    /**
+     * Get a category by ID.
+     *
+     * @param string $id The ID of the category.
+     * @return void Outputs JSON response.
+     */
+    public function getCategoryById(string $id): void {
         try {
             $category = $this->categoryModel->getCategoryById($id);
             if ($category) {
@@ -53,8 +62,12 @@ class CategoryController {
         }
     }
 
-    // POST /categories
-    public function createCategory() {
+    /**
+     * Create a new category.
+     *
+     * @return void Outputs JSON response.
+     */
+    public function createCategory(): void {
         $input = json_decode(file_get_contents('php://input'), true);
 
         $name = $input['name'] ?? null;
@@ -85,8 +98,13 @@ class CategoryController {
         }
     }
 
-    // PUT /categories/{id}
-    public function updateCategory($id) {
+    /**
+     * Update an existing category.
+     *
+     * @param string $id The ID of the category.
+     * @return void Outputs JSON response.
+     */
+    public function updateCategory(string $id): void {
         $input = json_decode(file_get_contents('php://input'), true);
 
         $parentId = $input['parent_id'] ?? null;

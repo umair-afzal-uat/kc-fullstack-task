@@ -3,16 +3,21 @@
 namespace Controllers;
 
 use Models\Course;
+use Exception;
 
 class CourseController {
-    private $courseModel;
+    private Course $courseModel;
 
     public function __construct() {
-        $this->courseModel = new \Models\Course();
+        $this->courseModel = new Course();
     }
 
-    // GET /courses
-    public function getCourses() {
+    /**
+     * Get all courses, optionally filtered by category ID.
+     *
+     * @return void Outputs JSON response.
+     */
+    public function getCourses(): void {
         try {
             $categoryId = $_GET['category_id'] ?? null;
 
@@ -22,7 +27,7 @@ class CourseController {
                 'status' => 'success',
                 'data' => $courses
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
                 'status' => 'error',
@@ -31,8 +36,13 @@ class CourseController {
         }
     }
 
-    // GET /courses/{id}
-    public function getCourseById($id) {
+    /**
+     * Get a course by ID.
+     *
+     * @param string $id The ID of the course.
+     * @return void Outputs JSON response.
+     */
+    public function getCourseById(string $id): void {
         try {
             $course = $this->courseModel->getCourseById($id);
 
@@ -48,7 +58,7 @@ class CourseController {
                     'message' => 'Course not found'
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
                 'status' => 'error',
