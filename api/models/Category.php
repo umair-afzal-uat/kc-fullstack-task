@@ -3,16 +3,21 @@
 namespace Models;
 
 use Config\Database;
+use PDO;
 
 class Category {
-    private $db;
+    private PDO $db;
 
     public function __construct() {
         $this->db = Database::getInstance();
     }
 
-    // Fetch all categories with course counts (including subcategories)
-    public function getAllCategories() {
+    /**
+     * Fetch all categories along with the count of courses in each category (including subcategories).
+     *
+     * @return array An associative array of categories with course counts.
+     */
+    public function getAllCategories(): array {
         $sql = "
             SELECT c.id, c.name, c.parent_id, c.depth,
                    (SELECT COUNT(*) 
@@ -24,11 +29,16 @@ class Category {
             FROM categories c
         ";
         $stmt = $this->db->query($sql);
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Fetch a single category by ID
-    public function getCategoryById($id) {
+    /**
+     * Fetch a single category by ID, including the count of courses.
+     *
+     * @param string $id The ID of the category.
+     * @return array|false The category data or false if not found.
+     */
+    public function getCategoryById(string $id): array|false {
         $stmt = $this->db->prepare("
             SELECT id, name, parent_id, depth,
                    (SELECT COUNT(*) 
@@ -40,13 +50,20 @@ class Category {
             FROM categories
             WHERE id = :id
         ");
-        $stmt->bindParam(':id', $id, \PDO::PARAM_STR);
+        $stmt->bindParam(':id', $id, PDO::PARAM_STR);
         $stmt->execute();
-        return $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Insert a new category
-    public function insertCategory($name, $parentId = null) {
+    /**
+     * Insert a new category.
+     *
+     * @param string $name The name of the category.
+     * @param string|null $parentId The ID of the parent category (optional).
+     * @return string The newly generated category ID.
+     * @throws \Exception If parent category doesn't exist or exceeds depth limit.
+     */
+    public function insertCategory(string $name, ?string $parentId = null): string {
         // Validate maximum depth
         if ($parentId !== null) {
             $parentDepth = $this->getCategoryDepth($parentId);
@@ -74,8 +91,14 @@ class Category {
         return $id;
     }
 
-    // Update an existing category
-    public function updateCategory($id, $parentId = null) {
+    /**
+     * Update an existing category.
+     *
+     * @param string $id The ID of the category.
+     * @param string|null $parentId The ID of the new parent category (optional).
+     * @throws \Exception If parent category doesn't exist or exceeds depth limit.
+     */
+    public function updateCategory(string $id, ?string $parentId = null): void {
         // Validate maximum depth
         if ($parentId !== null) {
             $parentDepth = $this->getCategoryDepth($parentId);
@@ -100,14 +123,19 @@ class Category {
         $stmt->execute();
     }
 
-    // Get the depth of a category
-    private function getCategoryDepth($categoryId) {
+    /**
+     * Get the depth of a category.
+     *
+     * @param string $categoryId The ID of the category.
+     * @return int|false The depth of the category or false if not found.
+     */
+    private function getCategoryDepth(string $categoryId): int|false {
         $stmt = $this->db->prepare("
             SELECT depth FROM categories WHERE id = :id
         ");
         $stmt->bindParam(':id', $categoryId);
         $stmt->execute();
-        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-        return $result ? $result['depth'] : false;
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? (int)$result['depth'] : false;
     }
 }
