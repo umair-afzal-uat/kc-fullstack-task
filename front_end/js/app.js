@@ -10,12 +10,20 @@ const COURSES_API = 'http://api.cc.localhost/courses';
 let allCategories = [];
 let allCourses = [];
 
-// Utility function to truncate text with ellipses
+/**
+ * Truncate text to a specified length and append ellipses if necessary.
+ * @param {string} text - The text to truncate.
+ * @param {number} maxLength - The maximum length of the text.
+ * @returns {string} - The truncated text.
+ */
 function truncateText(text, maxLength) {
   return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
 }
 
-// Fetch Categories
+/**
+ * Fetch categories from the API and update the UI.
+ * @returns {Promise<void>}
+ */
 async function fetchCategories() {
   try {
     const response = await fetch(CATEGORIES_API);
@@ -27,37 +35,43 @@ async function fetchCategories() {
   }
 }
 
-// Fetch Courses
+/**
+ * Fetch courses from the API and update the UI.
+ * @param {string|null} categoryId - The category ID to filter courses (optional).
+ * @returns {Promise<void>}
+ */
 async function fetchCourses(categoryId = null) {
   try {
     const url = categoryId ? `${COURSES_API}?category_id=${categoryId}` : COURSES_API;
     const response = await fetch(url);
     const data = await response.json();
     allCourses = data;
-    fetchCategories(); // Recalculate course counts after fetching courses
+    fetchCategories(); 
     renderCourses();
   } catch (error) {
     console.error('Error fetching courses:', error);
   }
 }
 
-// Calculate Course Counts for Categories (Including Child Categories)
+/**
+ * Calculate the number of courses per category, including parent categories.
+ * @param {Array} categories - The list of categories.
+ * @param {Array} courses - The list of courses.
+ * @returns {Array} - Categories with updated course counts.
+ */
 function calculateCourseCounts(categories, courses) {
   const categoryMap = new Map();
 
-  // Initialize counts
   categories.data.forEach((category) => {
     categoryMap.set(category.id, { ...category, count_of_courses: category.count_of_courses });
   });
 
-  // Count direct courses
   courses.data.forEach((course) => {
     if (categoryMap.has(course.category_id)) {
       categoryMap.get(course.category_id).count_of_courses++;
     }
   });
 
-  // Propagate counts to parent categories
   categories.data.forEach((category) => {
     let current = category;
     while (current.parent && categoryMap.has(current.parent)) {
@@ -69,30 +83,40 @@ function calculateCourseCounts(categories, courses) {
   return Array.from(categoryMap.values());
 }
 
-// Render Categories
+/**
+ * Build a category tree from a flat category list.
+ * @param {Array} categories - The list of categories.
+ * @returns {Array} - The category tree.
+ */
 function buildCategoryTree(categories) {
   let categoryMap = new Map();
   let tree = [];
 
   categories.forEach(category => {
-      category.children = [];
-      categoryMap.set(category.id, category);
+    category.children = [];
+    categoryMap.set(category.id, category);
   });
 
   categories.forEach(category => {
-      if (category.parent_id) {
-          let parent = categoryMap.get(category.parent_id);
-          if (parent) {
-              parent.children.push(category);
-          }
-      } else {
-          tree.push(category);
+    if (category.parent_id) {
+      let parent = categoryMap.get(category.parent_id);
+      if (parent) {
+        parent.children.push(category);
       }
+    } else {
+      tree.push(category);
+    }
   });
 
   return tree;
 }
 
+/**
+ * Render the category tree recursively.
+ * @param {Array} categories - The category tree.
+ * @param {number} depth - The indentation depth.
+ * @returns {string} - The generated HTML.
+ */
 function renderCategoryTree(categories, depth = 0) {
   return categories.map(category => `
       <li onclick="filterCourses('${category.id}')" style="padding-left: ${depth * 20}px">
@@ -102,6 +126,9 @@ function renderCategoryTree(categories, depth = 0) {
   `).join('');
 }
 
+/**
+ * Render the category list in the UI.
+ */
 function renderCategories() {
   let tree = buildCategoryTree(allCategories);
   categoryList.innerHTML = `
@@ -110,7 +137,9 @@ function renderCategories() {
   `;
 }
 
-// Render Courses
+/**
+ * Render the course list in the UI.
+ */
 function renderCourses() {
   if (allCourses.length === 0) {
     courseList.innerHTML = '<p>No courses available.</p>';
@@ -120,40 +149,37 @@ function renderCourses() {
   const isDesktop = window.matchMedia('(min-width: 768px)').matches;
 
   courseList.innerHTML = allCourses.data
-    .map(
-      (course) => {
-        const category = allCategories.find((cat) => cat.id === course.category_id);
-        const mainCategoryName = course ? course.main_category_name : 'Unknown Category';
+    .map((course) => {
+      const mainCategoryName = course ? course.main_category_name : 'Unknown Category';
+      const truncatedTitle = isDesktop ? truncateText(course.title, 50) : course.title;
+      const truncatedDescription = isDesktop ? truncateText(course.description, 100) : course.description;
 
-        const truncatedTitle = isDesktop
-          ? truncateText(course.title, 50)
-          : course.title;
-        const truncatedDescription = isDesktop
-          ? truncateText(course.description, 100)
-          : course.description;
-
-        return `
-          <div class="course-card">
-            <img src="${course.image_preview}" alt="${course.title}" />
-            <h3>${truncatedTitle}</h3>
-            <p>${truncatedDescription}</p>
-            <small>Main Category: ${mainCategoryName}</small>
-          </div>
-        `;
-      }
-    )
+      return `
+        <div class="course-card">
+          <img src="${course.image_preview}" alt="${course.title}" />
+          <h3>${truncatedTitle}</h3>
+          <p>${truncatedDescription}</p>
+          <small>Main Category: ${mainCategoryName}</small>
+        </div>
+      `;
+    })
     .join('');
 }
 
-// Filter Courses by Category
+/**
+ * Filter courses based on selected category.
+ * @param {string|null} categoryId - The selected category ID.
+ */
 function filterCourses(categoryId) {
   fetchCourses(categoryId);
 }
 
-// Initialize App
+/**
+ * Initialize the application.
+ */
 function initApp() {
-  fetchCourses(); // Fetch all courses initially
+  fetchCourses();
 }
 
-// Start the Application
+// Start the application
 initApp();
