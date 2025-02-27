@@ -28,7 +28,14 @@
 
 ```
 docker-compose up --build
+To run migrations and data seeding
+docker-compose exec api bash
+php config/setup_database.php
+
 ```
+
+Notes:
+For task purpose i added endpoints in app js but the best approch is .env
 
 ## Hosts:
 API host: http://api.cc.localhost
