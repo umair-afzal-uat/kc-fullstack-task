@@ -19,18 +19,24 @@ class Category {
      */
     public function getAllCategories(): array {
         $sql = "
+            WITH RECURSIVE category_tree AS (
+                SELECT id, parent_id FROM categories
+                WHERE parent_id IS NULL
+                UNION ALL
+                SELECT c.id, c.parent_id FROM categories c
+                INNER JOIN category_tree ct ON c.parent_id = ct.id
+            )
             SELECT c.id, c.name, c.parent_id, c.depth,
                    (SELECT COUNT(*) 
                     FROM courses 
-                    WHERE category_id IN (
-                        SELECT id FROM categories WHERE id = c.id OR parent_id = id
-                    )
+                    WHERE category_id IN (SELECT id FROM category_tree WHERE id = c.id OR parent_id = c.id)
                    ) AS count_of_courses
             FROM categories c
         ";
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
 
     /**
      * Fetch a single category by ID, including the count of courses.
